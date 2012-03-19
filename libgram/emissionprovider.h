@@ -10,7 +10,7 @@
 
 #include <string>
 
-namespace libgrams {
+namespace libgram {
 
 template<typename Value>
 class EmissionProvider {
@@ -21,6 +21,6 @@ public:
 	int virtual maximumGram() = 0;
 };
 
-} // namespace libgrams
+} // namespace libgram
 
 #endif /* EMISSIONPROVIDER_H_ */

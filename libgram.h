@@ -1,8 +1,8 @@
 /*
- * libviterbi.h
+ * libgram.h
  *
  *  Created on: Mar 13, 2012
- *      Author: fedora
+ *      Author: asanoki
  */
 
 #ifndef LIBGRAM_H_
@@ -18,4 +18,4 @@ extern "C" {
 }
 #endif
 
-#endif /* LIBVITERBI_H_ */
+#endif /* LIBGRAM_H_ */

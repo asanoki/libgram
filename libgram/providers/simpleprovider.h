@@ -15,7 +15,7 @@
 #include <libgram/query.h>
 #include <libgram/emissionprovider.h>
 
-namespace libgrams {
+namespace libgram {
 
 template<typename Value, typename Container = std::unordered_map<
 		std::basic_string<Value>, double> >
@@ -63,9 +63,6 @@ void SimpleProvider<Value, Container>::setAutoEpsilon() {
 			minimum = it->second;
 		}
 	}
-	std::cerr
-			<< "Automatic estimation of epsilon value is slow. You should do it explicite in your code."
-			<< std::endl;
 	m_epsilon = minimum / 2.0;
 }
 
@@ -78,18 +75,13 @@ void SimpleProvider<Value, Container>::setAutoMaximumGram() {
 			maximum = it->first.length();
 		}
 	}
-	std::cerr
-			<< "Automatic estimation of maximum gram length is slow. You should do it explicite in your code."
-			<< std::endl;
 	m_maximum_gram = maximum;
 }
 
 template<typename Value, typename Container>
 double SimpleProvider<Value, Container>::probability(
 		const std::basic_string<Value> &gram) {
-	if (m_epsilon == -1.0) {
-		setAutoEpsilon();
-	}
+	assert(m_epsilon >= 0.0);
 	if (m_container->find(gram) == m_container->end()) {
 		return m_epsilon;
 	}
@@ -98,22 +90,16 @@ double SimpleProvider<Value, Container>::probability(
 
 template<typename Value, typename Container>
 double SimpleProvider<Value, Container>::epsilon() {
-	if (m_epsilon < 0.0) {
-		setAutoEpsilon();
-	}
 	assert(m_epsilon >= 0.0);
 	return m_epsilon;
 }
 
 template<typename Value, typename Container>
 int SimpleProvider<Value, Container>::maximumGram() {
-	if (m_maximum_gram == -1) {
-		setAutoMaximumGram();
-	}
 	assert(m_maximum_gram > 0);
 	return m_maximum_gram;
 }
 
-} // namespace libgrams
+} // namespace libgram
 
 #endif /* SIMPLEPROVIDER_H_ */

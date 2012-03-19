@@ -19,7 +19,7 @@
 #include <cassert>
 #include <iostream>
 
-void loadNGrams(std::string filename, unsigned int n,
+void loadNGrams(std::string filename,
 		std::unordered_map<std::wstring, double> &result) {
 	// Loading n-grams from a file
 	std::wifstream data(filename);
@@ -27,6 +27,8 @@ void loadNGrams(std::string filename, unsigned int n,
 	std::wstring line;
 	std::wstring line_gram;
 	int line_value;
+	unsigned int n;
+	data >> n;
 	while (!data.eof()) {
 		std::getline(data, line);
 		if (line.length() < n)
@@ -39,7 +41,7 @@ void loadNGrams(std::string filename, unsigned int n,
 	}
 }
 
-void loadQuery(std::string filename, libgrams::Query<wchar_t> &query) {
+void loadQuery(std::string filename, libgram::Query<wchar_t> &query) {
 	// Loading query from a file
 	std::wifstream data(filename);
 	assert(data.good());
@@ -53,7 +55,7 @@ void loadQuery(std::string filename, libgrams::Query<wchar_t> &query) {
 			continue;
 		data >> line_probability;
 		if (line_probability < 0) {
-			libgrams::QuerySection<wchar_t> query_section(
+			libgram::QuerySection<wchar_t> query_section(
 					emission_probabilities, labels);
 			query.addSection(query_section);
 			labels.clear();
@@ -64,7 +66,6 @@ void loadQuery(std::string filename, libgrams::Query<wchar_t> &query) {
 			emission_probabilities.push_back(line_probability);
 		}
 	}
-	std::wcout << "Sections: " << query.sections().size() << std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -79,8 +80,8 @@ int main(int argc, char **argv) {
 
 	// Load data
 	std::wcout << L"Loading n-grams..." << std::endl;
-	loadNGrams("/opt/home/fedora/ngrams-3.txt", 3, map);
-	loadNGrams("/opt/home/fedora/ngrams-2.txt", 2, map);
+	loadNGrams("/opt/home/fedora/ngrams-3.txt", map);
+	loadNGrams("/opt/home/fedora/ngrams-2.txt", map);
 
 	// Convert occurences to probabilities
 	std::wcout << L"Merging n-grams and calculating probabilities..."
@@ -97,23 +98,25 @@ int main(int argc, char **argv) {
 
 	// Load query for the problem
 	std::wcout << L"Loading query" << std::endl;
-	libgrams::Query<wchar_t> query;
+	libgram::Query<wchar_t> query;
 	loadQuery("/opt/home/fedora/query.txt", query);
 
 	// Create and initialize the emission probability provider
 	std::wcout << L"Initializing provider" << std::endl;
-	libgrams::SimpleProvider<wchar_t> provider;
+	libgram::SimpleProvider<wchar_t> provider;
 	provider.setContainer(&map);
+	provider.setAutoEpsilon();
+	provider.setAutoMaximumGram();
 
 	// Create and initialize the solver
 	std::wcout << L"Initializing solver" << std::endl;
-	libgrams::Solver<wchar_t> solver;
-	solver.setQuery(&query);
+	libgram::Solver<wchar_t> solver;
 	solver.setEmissionProvider(&provider);
 
 	// Solving
 	std::wcout << L"Executing solver..." << std::endl;
-	solver.solve();
+	std::wstring result = solver.solve(query);
+	std::wcout << L"Result: " << result << std::endl;
 
 	return 0;
 }

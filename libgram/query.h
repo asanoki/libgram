@@ -10,7 +10,7 @@
 
 #include <vector>
 
-namespace libgrams {
+namespace libgram {
 
 template<typename Value> class QuerySection {
 private:
@@ -55,6 +55,6 @@ QuerySection<Value>::QuerySection(double *probabilities, Value *values) {
 	}
 }
 
-} // namespace libgrams
+} // namespace libgram
 
 #endif /* MODEL_H_ */
