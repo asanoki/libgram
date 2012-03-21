@@ -10,7 +10,6 @@
 
 #include <string>
 #include <cstring>
-#include <unordered_map>
 #include <cassert>
 #include <iostream>
 #include <cmath>
@@ -19,24 +18,38 @@
 #include <libgram/query.h>
 #include <libgram/emissionprovider.h>
 
+#ifdef LIBGRAM_HAVE_CXX0X
+#	include <unordered_map>
+#	define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::unordered_map
+#else
+#	ifdef LIBGRAM_HAVE_TR1
+#		include <tr1/unordered_map>
+#		define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::tr1::unordered_map
+#	else
+#		include <map>
+#		define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::map
+#	endif
+#endif
+
 namespace libgram {
 
 template<typename Value> class TemporaryState;
 
-template<typename Value, typename Container = std::unordered_map<
-		std::basic_string<Value>, TemporaryState<Value> > >
-class Solver {
-private:
-	EmissionProvider<Value> *m_emission_provider;
-public:
-	Solver() {
-		m_emission_provider = NULL;
-	}
-	void setEmissionProvider(EmissionProvider<Value> *emission_provider) {
-		m_emission_provider = emission_provider;
-	}
-	std::basic_string<Value> solve(Query<Value> &m_query);
-};
+template<
+		typename Value,
+		typename Container = LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME<std::basic_string<Value>, TemporaryState<Value> > >
+		class Solver {
+		private:
+			EmissionProvider<Value> *m_emission_provider;
+		public:
+			Solver() {
+				m_emission_provider = NULL;
+			}
+			void setEmissionProvider(EmissionProvider<Value> *emission_provider) {
+				m_emission_provider = emission_provider;
+			}
+			std::basic_string<Value> solve(Query<Value> &m_query);
+		};
 
 template<typename Value>
 class TemporaryState {
@@ -115,12 +128,14 @@ std::basic_string<Value> Solver<Value, Container>::solve(Query<Value> &query) {
 					candidate_index++) {
 				Gram gram_key;
 				if (it->first.length() >= maximum_gram)
-					 gram_key.append(it->first.substr(1, it->first.length() - 1));
+					gram_key.append(
+							it->first.substr(1, it->first.length() - 1));
 				else
 					gram_key.append(it->first);
 				gram_key += section_values[candidate_index];
 				// Calculating probability in logarithmic scale
-				double cum_probability = it->second.cumProbability() + log(section_probabilities[candidate_index]);
+				double cum_probability = it->second.cumProbability()
+						+ log(section_probabilities[candidate_index]);
 				if (new_tmp_states.find(gram_key) == new_tmp_states.end()) {
 					// Creating new TemporaryState instance
 					new_tmp_states[gram_key] = TemporaryState<Value>(gram_key,

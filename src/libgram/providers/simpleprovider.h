@@ -9,7 +9,6 @@
 #define SIMPLEPROVIDER_H_
 
 #include <cstdio>
-#include <unordered_map>
 #include <iostream>
 
 #include <libgram/query.h>
@@ -17,8 +16,8 @@
 
 namespace libgram {
 
-template<typename Value, typename Container = std::unordered_map<
-		std::basic_string<Value>, double> >
+template<typename Value, typename Container/* = std::unordered_map<
+		std::basic_string<Value>, double> */>
 class SimpleProvider: public EmissionProvider<Value> {
 private:
 	double m_epsilon;
