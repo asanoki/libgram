@@ -9,6 +9,7 @@
 #define EMISSIONPROVIDER_H_
 
 #include <string>
+#include <libgram/faststring.h>
 
 namespace libgram {
 
@@ -17,7 +18,7 @@ class EmissionProvider {
 public:
 	EmissionProvider() {
 	}
-	double virtual probability(const std::basic_string<Value> &gram) = 0;
+	double virtual probability(const FastString<Value> &gram) = 0;
 	int virtual maximumGram() = 0;
 };
 

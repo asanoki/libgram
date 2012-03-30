@@ -87,13 +87,13 @@ CC = gcc
 CCDEPMODE = depmode=none
 CFLAGS = -g -O2
 CPP = gcc -E
-CPPFLAGS = -std=c++0x
+CPPFLAGS = 
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=none
-CXXFLAGS = -g -O2
+CXXFLAGS = -O3
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"libgram\" -DPACKAGE_TARNAME=\"libgram\" -DPACKAGE_VERSION=\"1.0\" -DPACKAGE_STRING=\"libgram\ 1.0\" -DPACKAGE_BUGREPORT=\"http://www.jovislab.com/gramd\" -DPACKAGE_URL=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DPACKAGE=\"libgram\" -DVERSION=\"1.0\" -DLIBGRAM_HAVE_TR1=/\*\*/ -DLIBGRAM_HAVE_CXX0X=/\*\*/
+DEFS = -DPACKAGE_NAME=\"libgram\" -DPACKAGE_TARNAME=\"libgram\" -DPACKAGE_VERSION=\"1.0\" -DPACKAGE_STRING=\"libgram\ 1.0\" -DPACKAGE_BUGREPORT=\"http://www.jovislab.com/gramd\" -DPACKAGE_URL=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DPACKAGE=\"libgram\" -DVERSION=\"1.0\" -DLIBGRAM_HAVE_TR1=/\*\*/
 DEPDIR = .deps
 DLLTOOL = false
 DSYMUTIL = 
@@ -207,7 +207,7 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 libgramdir = $(includedir)/libgram
 libgramprovidersdir = $(includedir)/libgram/providers
 include_HEADERS = libgram.h
-libgram_HEADERS = libgram/solver.h libgram/query.h libgram/emissionprovider.h
+libgram_HEADERS = libgram/solver.h libgram/query.h libgram/emissionprovider.h libgram/faststring.h
 libgramproviders_HEADERS = libgram/providers/simpleprovider.h
 all: all-am
 

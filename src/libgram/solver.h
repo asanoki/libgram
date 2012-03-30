@@ -17,17 +17,27 @@
 
 #include <libgram/query.h>
 #include <libgram/emissionprovider.h>
+#include <libgram/faststring.h>
 
-#ifdef LIBGRAM_HAVE_CXX0X
-#	include <unordered_map>
-#	define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::unordered_map
+#ifdef LIBGRAM_HAVE_BOOST
+#	include <boost/unordered_map.hpp>
+#	define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME boost::unordered_map
+#	define LIBGRAM_SOLVER_DEFAULT_CONTAINER_ARGS , boost::hash<libgram::FastString<Value> >
 #else
-#	ifdef LIBGRAM_HAVE_TR1
-#		include <tr1/unordered_map>
-#		define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::tr1::unordered_map
+#	ifdef LIBGRAM_HAVE_CXX0X
+#		include <unordered_map>
+#		define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::unordered_map
+#		define LIBGRAM_SOLVER_DEFAULT_CONTAINER_ARGS , std::hash<libgram::FastString<Value> >
 #	else
-#		include <map>
-#		define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::map
+#		ifdef LIBGRAM_HAVE_TR1
+#			include <tr1/unordered_map>
+#			define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::tr1::unordered_map
+#			define LIBGRAM_SOLVER_DEFAULT_CONTAINER_ARGS , std::hash<libgram::FastString<Value> >
+#		else
+#			include <map>
+#			define LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME std::map
+#			define LIBGRAM_SOLVER_DEFAULT_CONTAINER_ARGS
+#		endif
 #	endif
 #endif
 
@@ -37,7 +47,7 @@ template<typename Value> class TemporaryState;
 
 template<
 		typename Value,
-		typename Container = LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME<std::basic_string<Value>, TemporaryState<Value> > >
+		typename Container = LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME<FastString<Value>, TemporaryState<Value>LIBGRAM_SOLVER_DEFAULT_CONTAINER_ARGS > >
 		class Solver {
 		private:
 			EmissionProvider<Value> *m_emission_provider;
@@ -57,19 +67,17 @@ private:
 	double m_cum_probability;
 	double m_emission_probability;
 	Value m_value;
-	std::basic_string<Value> m_gram;
+	FastString<Value> m_gram;
 	std::basic_string<Value> m_history;
 public:
 	TemporaryState() {
 		m_cum_probability = -std::numeric_limits<double>::max();
 		m_emission_probability = 0.0;
 	}
-	TemporaryState(std::basic_string<Value> gram, double emission_probability) {
+	TemporaryState(FastString<Value> &gram, double emission_probability) {
 		m_cum_probability = -std::numeric_limits<double>::max();
 		m_emission_probability = emission_probability;
-		if (gram.length() > 0) {
-			m_value = gram[gram.length() - 1];
-		}
+		m_value = gram.lastValue();
 		m_gram = gram;
 	}
 	double relax(double cum_probability,
@@ -77,7 +85,7 @@ public:
 		// We are already in logarithmic scale. Both cum_probability and m_emission_probability are in log scale.
 		if (cum_probability + m_emission_probability > m_cum_probability) {
 			m_cum_probability = cum_probability + m_emission_probability;
-			if (m_gram.length() > 0)
+			if (m_value != 0)
 				m_history = history + m_value;
 		}
 		return m_cum_probability;
@@ -95,7 +103,7 @@ public:
 
 template<typename Value, typename Container>
 std::basic_string<Value> Solver<Value, Container>::solve(Query<Value> &query) {
-	typedef std::basic_string<Value> Gram;
+	typedef FastString<Value> Gram;
 	Container temporary_states[2];
 	const std::vector<QuerySection<Value> > &sections = query.sections();
 
@@ -103,10 +111,13 @@ std::basic_string<Value> Solver<Value, Container>::solve(Query<Value> &query) {
 	unsigned int maximum_gram = m_emission_provider->maximumGram();
 
 	// Creating initial temporary node
-	Gram empty_gram;
+	Gram empty_gram(maximum_gram, (Value) 0); // TODO: See TODO below
+	std::basic_string<Value> empty_history;
 	TemporaryState<Value> initial_temporary_state(empty_gram, 1.0);
-	initial_temporary_state.relax(log(1.0), empty_gram);
+	initial_temporary_state.relax(log(1.0), empty_history /* history */);
 	temporary_states[0][empty_gram] = initial_temporary_state;
+	Gram gram_key(maximum_gram, (Value) 0); // TODO: We require from Value to have implicit constructor with numeric argument! Not good!
+	double cum_probability;
 
 	// Processing each section of Query data
 	for (unsigned int index = 0; index < sections.size(); index++) {
@@ -126,15 +137,11 @@ std::basic_string<Value> Solver<Value, Container>::solve(Query<Value> &query) {
 			for (unsigned int candidate_index = 0;
 					candidate_index < section_probabilities.size();
 					candidate_index++) {
-				Gram gram_key;
-				if (it->first.length() >= maximum_gram)
-					gram_key.append(
-							it->first.substr(1, it->first.length() - 1));
-				else
-					gram_key.append(it->first);
-				gram_key += section_values[candidate_index];
+				// Obsolete: Gram gram_key(it->first, section_values[candidate_index]);
+				gram_key.acquire(it->first, section_values[candidate_index]);
+
 				// Calculating probability in logarithmic scale
-				double cum_probability = it->second.cumProbability()
+				cum_probability = it->second.cumProbability()
 						+ log(section_probabilities[candidate_index]);
 				if (new_tmp_states.find(gram_key) == new_tmp_states.end()) {
 					// Creating new TemporaryState instance

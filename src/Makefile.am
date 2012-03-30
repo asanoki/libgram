@@ -8,5 +8,5 @@ libgramdir = $(includedir)/libgram
 libgramprovidersdir = $(includedir)/libgram/providers
 
 include_HEADERS = libgram.h
-libgram_HEADERS = libgram/solver.h libgram/query.h libgram/emissionprovider.h
+libgram_HEADERS = libgram/solver.h libgram/query.h libgram/emissionprovider.h libgram/faststring.h
 libgramproviders_HEADERS = libgram/providers/simpleprovider.h

@@ -13,6 +13,7 @@
 
 #include <libgram/query.h>
 #include <libgram/emissionprovider.h>
+#include <libgram/faststring.h>
 
 namespace libgram {
 
@@ -49,20 +50,13 @@ public:
 	void setAutoEpsilon();
 	void setAutoMaximumGram();
 	double epsilon();
-	double probability(const std::basic_string<Value> &gram);
+	double probability(const FastString<Value> &gram);
 	int maximumGram();
 };
 
 template<typename Value, typename Container>
 void SimpleProvider<Value, Container>::setAutoEpsilon() {
-	double minimum = -1.0;
-	for (typename Container::const_iterator it = m_container->begin();
-			it != m_container->end(); it++) {
-		if (it->second < minimum || minimum < 0) {
-			minimum = it->second;
-		}
-	}
-	m_epsilon = minimum / 2.0;
+	m_epsilon = 0.1;
 }
 
 template<typename Value, typename Container>
@@ -79,12 +73,21 @@ void SimpleProvider<Value, Container>::setAutoMaximumGram() {
 
 template<typename Value, typename Container>
 double SimpleProvider<Value, Container>::probability(
-		const std::basic_string<Value> &gram) {
+		const FastString<Value> &gram) {
 	assert(m_epsilon >= 0.0);
+	FastString<Value> subgram(0, gram);
+//	std::wcout << L"size: " << m_container->size() << std::endl;
+//	std::wcout << L"gram: " << gram.convertToString() << L", subgram: " << subgram.convertToString() << std::endl;
+//	std::wcout << L"gram: " << gram.hash() << L", subgram: " << gram.hash() << std::endl;
 	if (m_container->find(gram) == m_container->end()) {
 		return m_epsilon;
 	}
-	return (*m_container)[gram];
+	if (m_container->find(subgram) == m_container->end()) {
+		// WARNING: This should never happen!
+		assert(m_container->find(subgram) != m_container->end());
+	}
+//	std::wcout << L"Normal: " << ((*m_container)[gram] / (*m_container)[subgram]) << std::endl;
+	return (*m_container)[gram] / (*m_container)[subgram];
 }
 
 template<typename Value, typename Container>
