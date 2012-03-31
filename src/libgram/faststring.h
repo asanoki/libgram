@@ -12,8 +12,6 @@
 #include <cstring>
 #include <iostream>
 
-#include <boost/pool/pool_alloc.hpp>
-
 namespace libgram {
 
 template<class Type> class FastString;
@@ -98,35 +96,35 @@ public:
 		memmove((char *) m_data,
 				(char *) (m_data + 1), sizeof(Type) * (m_size - 1));m_data[m_size - 1]= symbol;
 	}
-		std::basic_string<Type> convertToString() const {
-			static Type *it;
-			static int left;
-			it = m_data;
-			left = m_size;
-			while (!it && left > 0) {
-				it++;
-				left--;
-			}
-			return std::basic_string<Type>(it, left);
+	std::basic_string<Type> convertToString() const {
+		static Type *it;
+		static int left;
+		it = m_data;
+		left = m_size;
+		while (!it && left > 0) {
+			it++;
+			left--;
 		}
-		size_t hash() const {
-			static size_t hash;
-			static int left;
-			static Type *it;
-			it = m_data;
-			left = m_size;
-			hash = 1;
-			while (left--) {
-				hash = hash * 101 + *it;
-				it++;
-			}
-			return hash;
+		return std::basic_string<Type>(it, left);
+	}
+	size_t hash() const {
+		static size_t hash;
+		static int left;
+		static Type *it;
+		it = m_data;
+		left = m_size;
+		hash = 1;
+		while (left--) {
+			hash = hash * 101 + *it;
+			it++;
 		}
-		~FastString() {
-			if (m_data)
-			delete [] m_data;
-		}
-	};
+		return hash;
+	}
+	~FastString() {
+		if (m_data)
+		delete [] m_data;
+	}
+};
 
 inline std::size_t hash_value(const libgram::FastString<wchar_t>& f) {
 	return f.hash();

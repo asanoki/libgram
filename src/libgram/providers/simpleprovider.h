@@ -74,20 +74,19 @@ void SimpleProvider<Value, Container>::setAutoMaximumGram() {
 template<typename Value, typename Container>
 double SimpleProvider<Value, Container>::probability(
 		const FastString<Value> &gram) {
-	assert(m_epsilon >= 0.0);
 	FastString<Value> subgram(0, gram);
-//	std::wcout << L"size: " << m_container->size() << std::endl;
-//	std::wcout << L"gram: " << gram.convertToString() << L", subgram: " << subgram.convertToString() << std::endl;
-//	std::wcout << L"gram: " << gram.hash() << L", subgram: " << gram.hash() << std::endl;
 	if (m_container->find(gram) == m_container->end()) {
-		return m_epsilon;
+//		return m_epsilon;
+		if (m_container->find(subgram) == m_container->end()) {
+			return m_epsilon;
+		}
+		return (m_epsilon) / (0.01 + (*m_container)[subgram]);
 	}
 	if (m_container->find(subgram) == m_container->end()) {
 		// WARNING: This should never happen!
 		assert(m_container->find(subgram) != m_container->end());
 	}
-//	std::wcout << L"Normal: " << ((*m_container)[gram] / (*m_container)[subgram]) << std::endl;
-	return (*m_container)[gram] / (*m_container)[subgram];
+	return (0.01 + (*m_container)[gram]) / (0.01 + (*m_container)[subgram]);
 }
 
 template<typename Value, typename Container>

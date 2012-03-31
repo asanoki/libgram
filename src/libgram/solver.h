@@ -48,18 +48,18 @@ template<typename Value> class TemporaryState;
 template<
 		typename Value,
 		typename Container = LIBGRAM_SOLVER_DEFAULT_CONTAINER_NAME<FastString<Value>, TemporaryState<Value>LIBGRAM_SOLVER_DEFAULT_CONTAINER_ARGS > >
-		class Solver {
-		private:
-			EmissionProvider<Value> *m_emission_provider;
-		public:
-			Solver() {
-				m_emission_provider = NULL;
-			}
-			void setEmissionProvider(EmissionProvider<Value> *emission_provider) {
-				m_emission_provider = emission_provider;
-			}
-			std::basic_string<Value> solve(Query<Value> &m_query);
-		};
+class Solver {
+private:
+	EmissionProvider<Value> *m_emission_provider;
+public:
+	Solver() {
+		m_emission_provider = NULL;
+	}
+	void setEmissionProvider(EmissionProvider<Value> *emission_provider) {
+		m_emission_provider = emission_provider;
+	}
+	std::basic_string<Value> solve(Query<Value> &m_query);
+};
 
 template<typename Value>
 class TemporaryState {
