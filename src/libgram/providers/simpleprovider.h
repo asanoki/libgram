@@ -76,17 +76,13 @@ double SimpleProvider<Value, Container>::probability(
 		const FastString<Value> &gram) {
 	FastString<Value> subgram(0, gram);
 	if (m_container->find(gram) == m_container->end()) {
-//		return m_epsilon;
-		if (m_container->find(subgram) == m_container->end()) {
-			return m_epsilon;
-		}
-		return (m_epsilon) / (0.01 + (*m_container)[subgram]);
+		return m_epsilon;
 	}
 	if (m_container->find(subgram) == m_container->end()) {
 		// WARNING: This should never happen!
 		assert(m_container->find(subgram) != m_container->end());
 	}
-	return (0.01 + (*m_container)[gram]) / (0.01 + (*m_container)[subgram]);
+	return ((*m_container)[gram]) / ((*m_container)[subgram]);
 }
 
 template<typename Value, typename Container>
